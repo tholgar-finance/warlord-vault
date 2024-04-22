@@ -1,6 +1,6 @@
 import axios from 'axios';
 import useSWR from 'swr';
-import { zapperAddress } from '../config/blockchain';
+import { zapAddress } from '../config/blockchain';
 
 const fetcher = (data: any) => (url: string) => axios.post(url, data).then((res) => res.data);
 export default function useParaswapTransaction(
@@ -21,10 +21,10 @@ export default function useParaswapTransaction(
       destToken: priceRoute?.destToken,
       srcAmount: priceRoute?.srcAmount,
       priceRoute: priceRoute,
-      userAddress: zapperAddress,
+      userAddress: zapAddress,
       srcDecimals: priceRoute?.srcDecimals,
       destDecimals: priceRoute?.destDecimals,
-      receiver: zapperAddress
+      receiver: zapAddress
     })
   );
 

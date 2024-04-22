@@ -24,7 +24,7 @@ import {
   vaultAddress,
   wethAddress,
   zapperABI,
-  zapperAddress
+  zapAddress
 } from '../../../config/blockchain';
 import { useStore } from '../../../store';
 import useParaswapPrices from '../../../hooks/useParaswapPrice';
@@ -81,7 +81,7 @@ const Swap: FC<{ validateStep: () => void }> = ({ validateStep }) => {
       : { token: cvxAddress, bestRoute: cvxData.priceRoute };
   }, [auraData, cvxData, auraRatio, cvxRatio]);
   const { data, write } = useContractWrite({
-    address: zapperAddress,
+    address: zapAddress,
     abi: zapperABI,
     functionName: 'zapEtherToSingleToken',
     value: wethDepositAmount
@@ -170,7 +170,7 @@ export const WethDepositModal: FC<WethDepositModalProps> = ({ step, validateStep
       <ApproveAllowance
         token={'weth'}
         tokenAddress={wethAddress}
-        allowanceFor={zapperAddress}
+        allowanceFor={zapAddress}
         step={step}
         validateStep={validateStep}
         address={address!}

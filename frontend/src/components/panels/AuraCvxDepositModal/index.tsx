@@ -1,7 +1,7 @@
 import { FC, useCallback, useEffect, useMemo } from 'react';
 import { Button, Flex, Spinner, useColorModeValue } from '@chakra-ui/react';
 import { useContractWrite, useWaitForTransaction } from 'wagmi';
-import { auraAddress, cvxAddress, zapAddress, zapABI } from '../../../config/blockchain';
+import { auraAddress, cvxAddress, zapAddress, zapperABI } from '../../../config/blockchain';
 import { useStore } from '../../../store';
 import { ApproveAllowance } from '../../blockchain/ApproveAllowance/Index';
 import useConnectedAccount from '../../../hooks/useConnectedAccount';
@@ -28,8 +28,8 @@ const DepositStep: FC<DepositStepProps> = ({
 }) => {
   const { data, write } = useContractWrite({
     address: zapAddress,
-    abi: zapABI,
-    functionName: multiToken ? 'zapMultiple' : 'zap'
+    abi: zapperABI,
+    functionName: multiToken ? 'zapVlTokens' : 'zapVlToken'
   });
   const { isLoading, isSuccess } = useWaitForTransaction({
     hash: data?.hash

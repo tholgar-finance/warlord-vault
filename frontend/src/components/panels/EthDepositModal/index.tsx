@@ -24,7 +24,7 @@ import {
   vaultAddress,
   wethAddress,
   zapperABI,
-  zapperAddress
+  zapAddress
 } from '../../../config/blockchain';
 import { useStore } from '../../../store';
 import useParaswapPrices from '../../../hooks/useParaswapPrice';
@@ -80,7 +80,7 @@ export const EthDepositModal: FC<EthDepositModalProps> = ({ step, validateStep }
       : { token: cvxAddress, bestRoute: cvxData.priceRoute };
   }, [auraData, cvxData, auraRatio, cvxRatio]);
   const { data, write } = useContractWrite({
-    address: zapperAddress,
+    address: zapAddress,
     abi: zapperABI,
     functionName: 'zapEtherToSingleToken',
     value: ethDepositAmount
