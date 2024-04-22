@@ -19,7 +19,7 @@ import { AuraCvxWithdrawPanel } from '../AuraCvxWithdraw';
 import { WithdrawPanelModal } from '../WithdrawModal';
 import { TokenSelector } from '../../ui/TokenSelector';
 import { TokenNumberInput } from '../../inputs/TokenNumberInput';
-import { vaultAddress, warIconUrl, wstkWarIconUrl } from '../../../config/blockchain';
+import { vaultAddress, vaultV1Address, warIconUrl, wstkWarIconUrl } from '../../../config/blockchain';
 import convertFormattedToBigInt from 'utils/convertFormattedToBigInt';
 import convertBigintToFormatted from 'utils/convertBigintToFormatted';
 import { tokensSelection, useStore } from '../../../store';
@@ -28,22 +28,22 @@ import { WalletConnectButton } from 'components/blockchain/WalletConnectButton';
 import useConnectedAccount from 'hooks/useConnectedAccount';
 import useOrFetchUserTokenBalance from '../../../hooks/useOrFetchUserTokenBalance';
 
-export interface WithdrawPanelProps {}
+export interface WithdrawV1PanelProps {}
 
 const tokensOutputs = new Map<string, () => JSX.Element>([
-  ['war', () => <WarWithdrawPanel token='thWAR' key={1} />],
+  ['war', () => <WarWithdrawPanel token='tWAR' key={1} />],
   ['aura/cvx', () => <AuraCvxWithdrawPanel key={2} />]
 ]);
 
 const tokens = [{ id: 'war', name: 'WAR', iconUrl: warIconUrl }];
 
-export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
-  const wstkWARInfos = useOrFetchTokenInfos({ token: 'thWAR' });
-  const thWARBalance = useOrFetchUserTokenBalance({ token: 'thWAR' });
+export const WithdrawV1Panel: FC<WithdrawV1PanelProps> = () => {
+  const wstkWARInfos = useOrFetchTokenInfos({ token: 'tWAR' });
+  const tWarBalance = useOrFetchUserTokenBalance({ token: 'tWAR' });
   const wstkWARDecimals = wstkWARInfos?.decimals;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isConnected } = useConnectedAccount();
-  const wstkWARWithdrawInputAmount = useStore((state) => state.getWithdrawInputTokenAmount('thWAR'));
+  const wstkWARWithdrawInputAmount = useStore((state) => state.getWithdrawInputTokenAmount('tWAR'));
   const setWithdrawInputTokenAmount = useStore((state) => state.setWithdrawInputTokenAmount);
   const setMaxWithdrawInputTokenAmount = useStore((state) => state.setMaxWithdrawInputTokenAmount);
   const [withdrawToken, setWithdrawToken] = useStore((state) => [
@@ -59,14 +59,14 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
     (amount: string) => {
       if (!wstkWARDecimals) return;
       const amountInWei = convertFormattedToBigInt(amount, wstkWARDecimals);
-      setWithdrawInputTokenAmount('thWAR', amountInWei);
+      setWithdrawInputTokenAmount('tWAR', amountInWei);
     },
     [setWithdrawInputTokenAmount, wstkWARDecimals]
   );
   const isWithdrawDisabled = useMemo(() => {
     return (
       wstkWARWithdrawInputAmount === 0n ||
-      (thWARBalance !== undefined && thWARBalance < wstkWARWithdrawInputAmount)
+      (tWarBalance !== undefined && tWarBalance < wstkWARWithdrawInputAmount)
     );
   }, [wstkWARWithdrawInputAmount]);
   const output = tokensOutputs.get(withdrawToken);
@@ -74,13 +74,13 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
   const info = useMemo(() => {
     switch (withdrawToken) {
       case 'war':
-        return 'Redeem thWAR for WAR';
+        return 'Redeem tWAR for WAR';
     }
   }, [withdrawToken]);
   const infoDesc = useMemo(() => {
     switch (withdrawToken) {
       case 'war':
-        return 'Redeem your thWAR for WAR. You can then redeem the WAR for CVX or AURA on Warlord frontend.';
+        return 'Redeem your tWAR for WAR. You can then redeem the WAR for CVX or AURA on Warlord frontend.';
     }
   }, [withdrawToken]);
 
@@ -104,8 +104,8 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
             </Box>
             <Box w="100%">
               <TokenNumberInput
-                token={vaultAddress}
-                ticker={'thWAR'}
+                token={vaultV1Address}
+                ticker={'tWAR'}
                 value={wstkWARWithdrawInputAmountFormatted}
                 iconUrl={wstkWarIconUrl}
                 onInputChange={setWithdrawAmount}
@@ -114,7 +114,7 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
                   setWithdrawOutputTokenAmount('aura', 0n);
                   setWithdrawOutputTokenAmount('cvx', 0n);
                 }}
-                onMaxClick={() => setMaxWithdrawInputTokenAmount('thWAR')}
+                onMaxClick={() => setMaxWithdrawInputTokenAmount('tWAR')}
               />
             </Box>
             <Box w="100%">
@@ -155,9 +155,9 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
           </Grid>
         </Box>
       </VStack>
-      <WithdrawPanelModal vaultAddress={vaultAddress} open={isOpen} onClose={onClose} />
+      <WithdrawPanelModal vaultAddress={vaultV1Address} open={isOpen} onClose={onClose} />
     </>
   );
 };
 
-WithdrawPanel.defaultProps = {};
+WithdrawV1Panel.defaultProps = {};

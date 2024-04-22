@@ -1,22 +1,24 @@
 import { FC, useEffect, useMemo } from 'react';
 import { Flex } from '@chakra-ui/react';
 import { TokenNumberOutput } from '../../ui/TokenNumberOutput';
-import { stakerAddress, vaultAddress, warIconUrl } from 'config/blockchain';
+import { stakerAddress, vaultAddress, vaultV1Address, warIconUrl } from 'config/blockchain';
 import { useStore } from '../../../store';
 import useOrFetchTokenInfos from '../../../hooks/useOrFetchTokenInfos';
 import convertBigintToFormatted from '../../../utils/convertBigintToFormatted';
 import { useBalance } from 'wagmi';
 
-export interface WarWithdrawPanelProps {}
+export interface WarWithdrawPanelProps {
+  token: 'thWAR' | 'tWAR';
+}
 
-export const WarWithdrawPanel: FC<WarWithdrawPanelProps> = () => {
+export const WarWithdrawPanel: FC<WarWithdrawPanelProps> = ({ token }) => {
   const war = useOrFetchTokenInfos({ token: 'war' });
-  const vault = useOrFetchTokenInfos({ token: 'tWAR' });
+  const vault = useOrFetchTokenInfos({ token });
   const { data: stakerBalance } = useBalance({
     token: stakerAddress,
-    address: vaultAddress
+    address: token == 'thWAR' ? vaultAddress : vaultV1Address
   });
-  const wstkWARWithdrawInputAmount = useStore((state) => state.getWithdrawInputTokenAmount('tWAR'));
+  const wstkWARWithdrawInputAmount = useStore((state) => state.getWithdrawInputTokenAmount(token));
   const warWithdrawOutputAmount = useStore((state) => state.getWithdrawOutputTokenAmount('war'));
   const setWithdrawOutputAmount = useStore((state) => state.setWithdrawOutputTokenAmount);
   const warWithdrawOutputAmountFormatted = useMemo(() => {

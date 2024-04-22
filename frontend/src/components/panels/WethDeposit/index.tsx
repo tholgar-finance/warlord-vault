@@ -32,7 +32,7 @@ export const WethDepositPanel: FC<WethDepositPanelProps> = () => {
       iconUrl={wethIconUrl}
       value={ethDepositInputAmountFormatted}
       onInputChange={setAmount}
-      onInputClear={() => setDepositOutputTokenAmount('tWAR', 0n)}
+      onInputClear={() => setDepositOutputTokenAmount('thWAR', 0n)}
       onMaxClick={() => {
         setMaxDepositInputTokenAmount('weth');
       }}

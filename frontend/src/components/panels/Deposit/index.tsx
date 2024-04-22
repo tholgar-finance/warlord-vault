@@ -79,7 +79,7 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
   const cvxDepositAmount = useStore((state) => state.getDepositInputTokenAmount('cvx'));
   const ethDepositAmount = useStore((state) => state.getDepositInputTokenAmount('eth'));
   const wethDepositAmount = useStore((state) => state.getDepositInputTokenAmount('weth'));
-  const wstkWAROutputAmount = useStore((state) => state.getDepositOutputTokenAmount('tWAR'));
+  const wstkWAROutputAmount = useStore((state) => state.getDepositOutputTokenAmount('thWAR'));
   const [depositToken, setDepositToken] = useStore((state) => [
     state.depositToken,
     state.setDepositToken
@@ -94,7 +94,7 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
   const cvxBalance = useOrFetchUserTokenBalance({ token: 'cvx' });
   const ethBalance = useOrFetchUserTokenBalance({ token: 'eth' });
   const wethBalance = useOrFetchUserTokenBalance({ token: 'weth' });
-  const wstkWarInfos = useOrFetchTokenInfos({ token: 'tWAR' });
+  const wstkWarInfos = useOrFetchTokenInfos({ token: 'thWAR' });
   const auraInfos = useOrFetchTokenInfos({ token: 'aura' });
   const cvxInfos = useOrFetchTokenInfos({ token: 'cvx' });
   const wstkWarDecimals = wstkWarInfos?.decimals;
@@ -170,17 +170,17 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
   const info = useMemo(() => {
     switch (depositToken) {
       case 'war':
-        return 'Mint tWAR with WAR';
+        return 'Mint thWAR with WAR';
       case 'aura/cvx':
-        return 'Mint tWAR with CVX, AURA or both';
+        return 'Mint thWAR with CVX, AURA or both';
     }
   }, [depositToken]);
   const infoDesc = useMemo(() => {
     switch (depositToken) {
       case 'war':
-        return 'Deposit WAR in the vault to mint tWAR. The value of tWAR will grow with time as rewards are harvested.';
+        return 'Deposit WAR in the vault to mint thWAR. The value of thWAR will grow with time as rewards are harvested.';
       case 'aura/cvx':
-        return 'Mint WAR and deposit into the vault in one transaction. The value of tWAR will grow with time as rewards are harvested.';
+        return 'Mint WAR and deposit into the vault in one transaction. The value of thWAR will grow with time as rewards are harvested.';
     }
   }, [depositToken]);
 
@@ -188,7 +188,7 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
   const cvxRatio = useTokenRatio(cvxAddress);
 
   useEffect(() => {
-    // console.log('refreshing tWAR amount');
+    // console.log('refreshing thWAR amount');
     // console.log('stakerBalance', stakerBalance);
     // console.log('wstkWarInfos', wstkWarInfos);
     if (
@@ -206,7 +206,7 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
         ? warDepositAmount
         : (warDepositAmount * wstkWarInfos?.totalSupply) / stakerBalance;
 
-    setDepositOutputTokenAmounts('tWAR', amount);
+    setDepositOutputTokenAmounts('thWAR', amount);
   }, [warDepositAmount, depositToken, wstkWarInfos, stakerBalance]);
 
   useEffect(() => {
@@ -223,7 +223,7 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
     const cvxAmountInWar = (cvxDepositAmount * (cvxRatio as bigint)) / BigInt(1e18);
 
     setDepositOutputTokenAmounts(
-      'tWAR',
+      'thWAR',
       wstkWarInfos.totalSupply === 0n
         ? auraAmountInWar + cvxAmountInWar
         : ((auraAmountInWar + cvxAmountInWar) * wstkWarInfos?.totalSupply) / stakerBalance
@@ -259,11 +259,11 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
       console.log('cvxAmountInWar is greater', cvxAmountInWar);
     }
     const bigger = auraAmountInWar > cvxAmountInWar ? auraAmountInWar : cvxAmountInWar;
-    const tWarAmount =
+    const thWARAmount =
       wstkWarInfos.totalSupply === 0n
         ? bigger
         : (bigger * wstkWarInfos?.totalSupply) / stakerBalance;
-    setDepositOutputTokenAmounts('tWAR', tWarAmount);
+    setDepositOutputTokenAmounts('thWAR', thWARAmount);
   }, [auraFromEth, cvxFromEth, ethDepositAmount, auraRatio, cvxRatio]);
 
   useEffect(() => {
@@ -282,11 +282,11 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
     const cvxAmountInWar = (cvxFromWeth * (cvxRatio as bigint)) / BigInt(1e18);
 
     const bigger = auraAmountInWar > cvxAmountInWar ? auraAmountInWar : cvxAmountInWar;
-    const tWarAmount =
+    const thWARAmount =
       wstkWarInfos.totalSupply === 0n
         ? bigger
         : (bigger * wstkWarInfos?.totalSupply) / stakerBalance;
-    setDepositOutputTokenAmounts('tWAR', tWarAmount);
+    setDepositOutputTokenAmounts('thWAR', thWARAmount);
   }, [auraFromWeth, cvxFromWeth, wethDepositAmount, auraRatio, cvxRatio]);
 
   const buttonBgColor = useColorModeValue('brand.primary.200', 'brand.primary.300');
@@ -314,7 +314,7 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
             </Center>
             <Box w="100%">
               <TokenNumberOutput
-                ticker={'tWAR'}
+                ticker={'thWAR'}
                 iconUrl={wstkWarIconUrl}
                 value={wstkWAROutputAmountFormatted}
               />

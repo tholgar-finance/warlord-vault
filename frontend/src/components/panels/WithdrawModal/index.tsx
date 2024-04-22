@@ -14,16 +14,17 @@ import {
 } from '@chakra-ui/react';
 import { ProgressStepper } from '../../ui/ProgressStepper';
 import { useStore } from '../../../store';
-import { useContractWrite, useWaitForTransaction } from 'wagmi';
-import { vaultABI, vaultAddress } from '../../../config/blockchain';
+import { Address, useContractWrite, useWaitForTransaction } from 'wagmi';
+import { vaultABI } from '../../../config/blockchain';
 import useConnectedAccount from '../../../hooks/useConnectedAccount';
 
 export interface WithdrawPanelModalProps {
+  vaultAddress: Address;
   open: boolean;
   onClose: () => void;
 }
 
-export const WithdrawPanelModal: FC<WithdrawPanelModalProps> = ({ open, onClose }) => {
+export const WithdrawPanelModal: FC<WithdrawPanelModalProps> = ({ vaultAddress, open, onClose }) => {
   const withdrawToken = useStore((state) => state.withdrawToken);
   const wstkWARWithdrawInputAmount = useStore((state) => state.getWithdrawInputTokenAmount('tWAR'));
   const resetBalances = useStore((state) => state.resetBalances);

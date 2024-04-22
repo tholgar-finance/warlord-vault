@@ -96,7 +96,7 @@ export const DepositPanelModal: FC<DepositPanelModalProps> = ({ open, onClose })
     if (activeStep == steps.length) {
       resetBalances();
       resetStats();
-      resetTokenInfos('tWAR');
+      resetTokenInfos('thWAR');
       onClose();
     }
   }, [activeStep, steps, resetBalances, resetStats, onClose]);

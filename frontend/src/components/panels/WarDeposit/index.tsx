@@ -37,7 +37,7 @@ export const WarDepositPanel: FC<WarDepositPanelProps> = () => {
       iconUrl={warIconUrl}
       value={warDepositInputAmountFormatted}
       onInputChange={setAmount}
-      onInputClear={() => setDepositOutputTokenAmount('tWAR', 0n)}
+      onInputClear={() => setDepositOutputTokenAmount('thWAR', 0n)}
       onMaxClick={() => {
         setMaxDepositInputTokenAmount('war');
       }}

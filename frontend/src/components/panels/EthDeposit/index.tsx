@@ -31,7 +31,7 @@ export const EthDepositPanel: FC<EthDepositPanelProps> = () => {
       iconUrl={ethIconUrl}
       value={ethDepositInputAmountFormatted}
       onInputChange={setAmount}
-      onInputClear={() => setDepositOutputTokenAmount('tWAR', 0n)}
+      onInputClear={() => setDepositOutputTokenAmount('thWAR', 0n)}
       onMaxClick={() => {
         setMaxDepositInputTokenAmount('eth');
       }}

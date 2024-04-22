@@ -4,6 +4,7 @@ import {
   auraAddress,
   cvxAddress,
   vaultAddress,
+  vaultV1Address,
   warAddress,
   wethAddress
 } from '../config/blockchain';
@@ -44,6 +45,10 @@ const defaultTokenInfos: TokenInfo[] = [
   },
   {
     id: 'tWAR',
+    address: vaultV1Address
+  },
+  {
+    id: 'thWAR',
     address: vaultAddress
   },
   {

@@ -14,7 +14,7 @@ export const CirculatingSupply: FC<CirculatingSupplyProps> = () => {
     state.circulatingSupply,
     state.setCirculatingSupply
   ]);
-  const infos = useOrFetchTokenInfos({ token: 'tWAR' });
+  const infos = useOrFetchTokenInfos({ token: 'thWAR' });
 
   useEffect(() => {
     if (
