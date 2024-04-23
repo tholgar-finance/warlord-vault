@@ -4,14 +4,12 @@ import { DepositPanel } from '../../components/panels/Deposit';
 import { StatsDisplay } from 'components/blockchain/StatsDisplay';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import { WithdrawPanel } from '../../components/panels/Withdraw';
-import { AjnaBanner } from 'components/ui/AjnaBanner';
 import { MigratePanel } from 'components/panels/Migrate';
 import { WithdrawV1Panel } from 'components/panels/WithdrawV1';
 
 const AutoCompounder: FC = () => {
   return (
     <>
-      <AjnaBanner />
       <StatsDisplay />
       <Tabs colorScheme="green" size="lg" _selected={{}}>
         <Container
