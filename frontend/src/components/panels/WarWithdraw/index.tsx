@@ -31,8 +31,8 @@ export const WarWithdrawPanel: FC<WarWithdrawPanelProps> = ({ token }) => {
     setWithdrawOutputAmount(
       'war',
       vault.totalSupply === 0n
-        ? wstkWARWithdrawInputAmount
-        : wstkWARWithdrawInputAmount * stakerBalance.value / vault.totalSupply
+        ? wstkWARWithdrawInputAmount * 98500n / 100000n
+        : wstkWARWithdrawInputAmount * stakerBalance.value / vault.totalSupply * 98500n / 100000n
     );
   }, [wstkWARWithdrawInputAmount, vault, stakerBalance]);
 
