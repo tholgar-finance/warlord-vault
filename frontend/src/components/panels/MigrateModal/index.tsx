@@ -108,6 +108,7 @@ export interface MigratePanelModalProps {
 
 export const MigratePanelModal: FC<MigratePanelModalProps> = ({ migrationAmount, open, onClose }) => {
   const resetBalances = useStore((state) => state.resetBalances);
+  const resetStats = useStore((state) => state.resetStats);
   const { address } = useConnectedAccount();
   const { data: migrateData, write: writeMigrate } = useContractWrite({
     address: migratorAddress,
@@ -144,6 +145,7 @@ export const MigratePanelModal: FC<MigratePanelModalProps> = ({ migrationAmount,
   useEffect(() => {
     if (isSuccess) {
       resetBalances();
+      resetStats();
       onClose();
     }
   }, [isSuccess, onClose]);
