@@ -77,7 +77,7 @@ export const SideBarBody: FC<PropsWithChildren<SideBarBodyProps>> = (props) => {
               boxSize={7}
             />
           </ChakraLink>
-          <ChakraLink href={'https://github.com/astrodevs-labs/tholgar'} isExternal>
+          <ChakraLink href={'https://github.com/tholgar-finance/warlord-vault'} isExternal>
             <Icon
               as={BiLogoGithub}
               _hover={{
