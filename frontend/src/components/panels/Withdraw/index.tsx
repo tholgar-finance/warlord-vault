@@ -111,8 +111,6 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
                 onInputChange={setWithdrawAmount}
                 onInputClear={() => {
                   setWithdrawOutputTokenAmount('war', 0n);
-                  setWithdrawOutputTokenAmount('aura', 0n);
-                  setWithdrawOutputTokenAmount('cvx', 0n);
                 }}
                 onMaxClick={() => setMaxWithdrawInputTokenAmount('thWAR')}
               />
@@ -155,7 +153,7 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
           </Grid>
         </Box>
       </VStack>
-      <WithdrawPanelModal vaultAddress={vaultAddress} open={isOpen} onClose={onClose} />
+      <WithdrawPanelModal vaultAddress={vaultAddress} open={isOpen} onClose={onClose} inputToken={'thWAR'} />
     </>
   );
 };

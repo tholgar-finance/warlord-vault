@@ -155,7 +155,7 @@ export const WithdrawV1Panel: FC<WithdrawV1PanelProps> = () => {
           </Grid>
         </Box>
       </VStack>
-      <WithdrawPanelModal vaultAddress={vaultV1Address} open={isOpen} onClose={onClose} />
+      <WithdrawPanelModal vaultAddress={vaultV1Address} open={isOpen} onClose={onClose} inputToken='tWAR' />
     </>
   );
 };
