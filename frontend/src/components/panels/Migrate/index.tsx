@@ -66,7 +66,7 @@ export const MigratePanel: FC<MigratePanelProps> = () => {
           <Text fontSize={'1.125em'} fontWeight={'semibold'}>
             Migrate to v2 vault
           </Text>
-          <Text opacity={0.7}>Descriptive text here</Text>
+          <Text opacity={0.7}>Migrate your tWAR from V1 Vault to V2 Vault.</Text>
         </Box>
         <Box w="100%">
           <VStack gap={2}>
