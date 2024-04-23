@@ -1,6 +1,8 @@
-// TODO update once its deployed
-export const vaultAddress = '0x188cA46Aa2c7ae10C14A931512B62991D5901453';
-export const zapAddress = '0x0598c652eEB0F95137Af02f32022005139453744';
+export const vaultAddress = '0x2fc1E74BC8A6D15fE768c10C2EDe7D6d95ec27e9';
+export const vaultV1Address = '0x188cA46Aa2c7ae10C14A931512B62991D5901453';
+export const zapAddress = '0x1Ec2b9a77A7226ACD457954820197F89B3E3a578';
+
+export const migratorAddress = '0x18708A93aD916fCafA4Ba365cdC723FcD3d8c65C';
 
 export const warAuraLocker = '0x7B90e043aaC79AdeA0Dbb0690E3c832757207a3B';
 export const warCvxLocker = '0x700d6d24A55512c6AEC08820B49da4e4193105B3';
@@ -22,6 +24,10 @@ export const auraIconUrl =
 export const cvxIconUrl = 'https://www.convexfinance.com/static/icons/svg/vlcvx.svg';
 export const auraCvxIconUrl = '/images/aura-cvx.svg';
 export const wstkWarIconUrl = '/images/tWAR.png';
+
+export const ethIconUrl = '/images/eth.png';
+
+export const wethIconUrl = '/images/weth.png';
 
 export const maxAllowance = 2n ** 256n - 1n;
 

@@ -12,6 +12,8 @@ import { ProgressStepper } from '../../ui/ProgressStepper';
 import { WarDepositModal } from '../WarDepositModal';
 import { AuraCvxDepositModal } from '../AuraCvxDepositModal';
 import { useStore } from '../../../store';
+import { EthDepositModal } from '../EthDepositModal';
+import { WethDepositModal } from '../WethDepositModal';
 
 export interface DepositPanelModalProps {
   depositTokens: string;
@@ -24,6 +26,8 @@ export const DepositPanelModal: FC<DepositPanelModalProps> = ({ open, onClose })
   const auraDepositAmount = useStore((state) => state.getDepositInputTokenAmount('aura'));
   const cvxDepositAmount = useStore((state) => state.getDepositInputTokenAmount('cvx'));
   const warDepositAmount = useStore((state) => state.getDepositInputTokenAmount('war'));
+  const ethDepositAmount = useStore((state) => state.getDepositInputTokenAmount('eth'));
+  const wethDepositAmount = useStore((state) => state.getDepositInputTokenAmount('weth'));
   const resetBalances = useStore((state) => state.resetBalances);
   const resetStats = useStore((state) => state.resetStats);
   const resetTokenInfos = useStore((state) => state.resetTokenInfos);
@@ -39,7 +43,7 @@ export const DepositPanelModal: FC<DepositPanelModalProps> = ({ open, onClose })
           description: 'Deposit token'
         }
       ];
-    else {
+    else if (depositTokens == 'aura/cvx') {
       let steps = [];
 
       if (auraDepositAmount > 0) {
@@ -63,6 +67,24 @@ export const DepositPanelModal: FC<DepositPanelModalProps> = ({ open, onClose })
           description: 'Deposit tokens'
         }
       ];
+    } else if (depositTokens == 'eth') {
+      return [
+        {
+          label: 'Swap & Deposit',
+          description: 'Swap token for vlTokens and deposit'
+        }
+      ];
+    } else {
+      return [
+        {
+          label: 'Approve WETH',
+          description: 'Approve WETH swap'
+        },
+        {
+          label: 'Swap & Deposit',
+          description: 'Swap token for vlTokens and deposit'
+        }
+      ];
     }
   }, [depositTokens, auraDepositAmount, cvxDepositAmount]);
   const { activeStep, goToNext } = useSteps({
@@ -74,7 +96,7 @@ export const DepositPanelModal: FC<DepositPanelModalProps> = ({ open, onClose })
     if (activeStep == steps.length) {
       resetBalances();
       resetStats();
-      resetTokenInfos('tWAR');
+      resetTokenInfos('thWAR');
       onClose();
     }
   }, [activeStep, steps, resetBalances, resetStats, onClose]);
@@ -82,10 +104,26 @@ export const DepositPanelModal: FC<DepositPanelModalProps> = ({ open, onClose })
   useEffect(() => {
     if (depositTokens == 'war' && warDepositAmount === 0n) {
       onClose();
-    } else if (depositTokens != 'war' && auraDepositAmount === 0n && cvxDepositAmount === 0n) {
+    } else if (
+      depositTokens === 'aura/cvx' &&
+      auraDepositAmount === 0n &&
+      cvxDepositAmount === 0n
+    ) {
+      onClose();
+    } else if (depositTokens === 'eth' && ethDepositAmount === 0n) {
+      onClose();
+    } else if (depositTokens === 'weth' && wethDepositAmount === 0n) {
       onClose();
     }
-  }, [depositTokens, auraDepositAmount, cvxDepositAmount, warDepositAmount]);
+  }, [
+    depositTokens,
+    auraDepositAmount,
+    cvxDepositAmount,
+    warDepositAmount,
+    onClose,
+    ethDepositAmount,
+    wethDepositAmount
+  ]);
 
   return (
     <Modal size={'xl'} variant={'brand'} isOpen={open} onClose={onClose} isCentered>
@@ -96,10 +134,13 @@ export const DepositPanelModal: FC<DepositPanelModalProps> = ({ open, onClose })
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {depositTokens == 'war' ? (
-            <WarDepositModal step={activeStep} validateStep={goToNext} />
-          ) : (
+          {depositTokens == 'war' && <WarDepositModal step={activeStep} validateStep={goToNext} />}
+          {depositTokens === 'aura/cvx' && (
             <AuraCvxDepositModal step={activeStep} validateStep={goToNext} />
+          )}
+          {depositTokens === 'eth' && <EthDepositModal step={activeStep} validateStep={goToNext} />}
+          {depositTokens === 'weth' && (
+            <WethDepositModal step={activeStep} validateStep={goToNext} />
           )}
         </ModalBody>
       </ModalContent>

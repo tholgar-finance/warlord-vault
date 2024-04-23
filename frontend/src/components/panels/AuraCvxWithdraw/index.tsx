@@ -14,7 +14,7 @@ export const AuraCvxWithdrawPanel: FC<AuraCvxWithdrawPanelProps> = () => {
   const auraDecimals = auraInfos?.decimals;
   const cvxInfos = useOrFetchTokenInfos({ token: 'cvx' });
   const cvxDecimals = cvxInfos?.decimals;
-  const wstWARWithdrawInputAmount = useStore((state) => state.getWithdrawInputTokenAmount('tWAR'));
+  const wsthWARWithdrawInputAmount = useStore((state) => state.getWithdrawInputTokenAmount('thWAR'));
   const auraWithdrawOutputAmount = useStore((state) => state.getWithdrawOutputTokenAmount('aura'));
   const cvxWithdrawOutputAmount = useStore((state) => state.getWithdrawOutputTokenAmount('cvx'));
   const setWithdrawOutputAmount = useStore((state) => state.setWithdrawOutputTokenAmount);
@@ -34,15 +34,15 @@ export const AuraCvxWithdrawPanel: FC<AuraCvxWithdrawPanelProps> = () => {
 
   useEffect(() => {
     if (!auraRatio) return;
-    const auraAmount = (wstWARWithdrawInputAmount * BigInt(1e18)) / auraRatio;
+    const auraAmount = (wsthWARWithdrawInputAmount * BigInt(1e18)) / auraRatio;
     setWithdrawOutputAmount('aura', auraAmount);
-  }, [auraRatio, wstWARWithdrawInputAmount]);
+  }, [auraRatio, wsthWARWithdrawInputAmount]);
 
   useEffect(() => {
     if (!cvxRatio) return;
-    const cvxAmount = (wstWARWithdrawInputAmount * BigInt(1e18)) / cvxRatio;
+    const cvxAmount = (wsthWARWithdrawInputAmount * BigInt(1e18)) / cvxRatio;
     setWithdrawOutputAmount('cvx', cvxAmount);
-  }, [cvxRatio, wstWARWithdrawInputAmount]);
+  }, [cvxRatio, wsthWARWithdrawInputAmount]);
 
   /*useEffect(() => {
     if (!amounts.find((am) => am.token == 'aura')) {

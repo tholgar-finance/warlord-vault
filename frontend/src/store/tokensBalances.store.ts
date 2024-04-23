@@ -5,7 +5,9 @@ import {
   cvxAddress,
   stakerAddress,
   vaultAddress,
-  warAddress
+  vaultV1Address,
+  warAddress,
+  wethAddress
 } from 'config/blockchain';
 import { Token } from 'types/Token';
 
@@ -39,11 +41,23 @@ const defaultTokenBalances: TokenBalance[] = [
   },
   {
     id: 'tWAR',
+    address: vaultV1Address
+  },
+  {
+    id: 'thWAR',
     address: vaultAddress
   },
   {
     id: 'stkWAR',
     address: stakerAddress
+  },
+  {
+    id: 'eth',
+    address: '0x0'
+  },
+  {
+    id: 'weth',
+    address: wethAddress
   }
 ];
 
