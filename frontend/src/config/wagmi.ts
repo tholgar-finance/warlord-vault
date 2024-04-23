@@ -18,15 +18,10 @@ if (
 const { chains, publicClient } = configureChains(
   [mainnet],
   [
-    jsonRpcProvider({
-      rpc: () => ({
-        http: 'http://localhost:8545'
-      })
-    })
-    /*publicProvider(),
+    publicProvider(),
     alchemyProvider({
       apiKey: process.env.REACT_APP_ALCHEMY_KEY
-    })*/
+    })
   ]
 );
 
