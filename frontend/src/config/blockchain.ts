@@ -1,4 +1,3 @@
-// TODO update once its deployed
 export const vaultAddress = '0x2fc1E74BC8A6D15fE768c10C2EDe7D6d95ec27e9';
 export const vaultV1Address = '0x188cA46Aa2c7ae10C14A931512B62991D5901453';
 export const zapAddress = '0x1Ec2b9a77A7226ACD457954820197F89B3E3a578';
