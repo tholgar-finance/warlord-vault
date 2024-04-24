@@ -12,7 +12,7 @@ contract Withdraw is VaultTest {
     }
 
     function test_withdraw_Normal(uint256 amount, address pranker) public {
-       amount = bound(amount, 1e18, 1000e18);
+        amount = bound(amount, 1e18, 1000e18);
         vm.assume(pranker != address(0));
         vm.assume(pranker != owner);
 
@@ -26,11 +26,24 @@ contract Withdraw is VaultTest {
         vm.stopPrank();
 
         assertEqDecimal(sharesWithdrawn, shares, 18, "Pranker should have withdrawn all shares");
-        assertEqDecimal(IERC20(vault.asset()).balanceOf(pranker), amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS(), 18, "Pranker should have received assets");
         assertEqDecimal(
-            staker.balanceOf(address(vault)), amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()), 18, "Staker should have received staking tokens"
+            IERC20(vault.asset()).balanceOf(pranker),
+            amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS(),
+            18,
+            "Pranker should have received assets"
+        );
+        assertEqDecimal(
+            staker.balanceOf(address(vault)),
+            amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()),
+            18,
+            "Staker should have received staking tokens"
         );
         assertEqDecimal(vault.balanceOf(pranker), 0, 18, "Pranker should have no shares");
-        assertEqDecimal(vault.totalAssets(), amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()), 18, "Total assets should have decreased");
+        assertEqDecimal(
+            vault.totalAssets(),
+            amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()),
+            18,
+            "Total assets should have decreased"
+        );
     }
 }

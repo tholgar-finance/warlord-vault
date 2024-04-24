@@ -35,9 +35,17 @@ contract Redeem is VaultTest {
 
         assertEqDecimal(IERC20(vault.asset()).balanceOf(pranker), assets, 18, "Pranker should have received assets");
         assertEqDecimal(
-            staker.balanceOf(address(vault)), amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()), 18, "Staker should have received staking tokens"
+            staker.balanceOf(address(vault)),
+            amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()),
+            18,
+            "Staker should have received staking tokens"
         );
         assertEqDecimal(vault.balanceOf(pranker), 0, 18, "Pranker should have no shares");
-        assertEqDecimal(vault.totalAssets(), amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()), 18, "Total assets should have decreased");
+        assertEqDecimal(
+            vault.totalAssets(),
+            amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()),
+            18,
+            "Total assets should have decreased"
+        );
     }
 }

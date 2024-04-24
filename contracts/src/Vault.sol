@@ -282,12 +282,7 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
     /**
      * @custom:notpaused when not paused
      */
-    function redeem(uint256 shares, address to, address owner)
-        public
-        override
-        whenNotPaused
-        returns (uint256 assets)
-    {
+    function redeem(uint256 shares, address to, address owner) public override whenNotPaused returns (uint256 assets) {
         return super.redeem(shares, to, owner);
     }
 

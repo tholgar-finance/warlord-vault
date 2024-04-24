@@ -37,7 +37,6 @@ contract MigrationTest is MainnetTest {
         swapper.setVault(address(vault));
         vm.stopPrank();
 
-
         oldVault = ERC4626(0x188cA46Aa2c7ae10C14A931512B62991D5901453);
 
         vm.prank(owner);
