@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./VaultTest.sol";
+import "./VaultTest.t.sol";
 
 contract Constructor is VaultTest {
     function test_constructor_Normal() public {
@@ -11,14 +11,16 @@ contract Constructor is VaultTest {
         assertEq(vault.minter(), address(minter), "Minter is not minter");
         assertEq(address(vault.asset()), address(war), "Asset is not WAR");
         assertEq(vault.staker(), address(staker), "Staker is not staker");
-        assertEq(vault.asset().allowance(address(vault), address(staker)), UINT256_MAX, "Staker allowance is not max");
+        assertEq(
+            IERC20(vault.asset()).allowance(address(vault), address(staker)), UINT256_MAX, "Staker allowance is not max"
+        );
     }
 
     function test_constructor_ZeroAddressStaker() public {
         vm.expectRevert(Errors.ZeroAddress.selector);
         vm.prank(owner);
         vault = new Vault(
-            owner, address(0), address(minter), address(swapper), 500, owner, address(usdc), operator, address(war)
+            owner, address(0), address(minter), address(swapper), 500, 150, owner, address(usdc), operator, address(war)
         );
     }
 
@@ -26,7 +28,7 @@ contract Constructor is VaultTest {
         vm.expectRevert(Errors.ZeroAddress.selector);
         vm.prank(owner);
         vault = new Vault(
-            owner, address(staker), address(0), address(swapper), 500, owner, address(usdc), operator, address(war)
+            owner, address(staker), address(0), address(swapper), 500, 150, owner, address(usdc), operator, address(war)
         );
     }
 
@@ -34,7 +36,7 @@ contract Constructor is VaultTest {
         vm.expectRevert(Errors.ZeroAddress.selector);
         vm.prank(owner);
         vault = new Vault(
-            owner, address(staker), address(minter), address(0), 500, owner, address(usdc), operator, address(war)
+            owner, address(staker), address(minter), address(0), 500, 150, owner, address(usdc), operator, address(war)
         );
     }
 }

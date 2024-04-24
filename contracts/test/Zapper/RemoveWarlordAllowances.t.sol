@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./ZapperTest.sol";
+import "./ZapperTest.t.sol";
 
 contract RemoveWarlordAllowances is ZapperTest {
     function test_removeWarlordAllowances_Normal() public {

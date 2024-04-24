@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import { Owned2Step } from "../utils/Owned2Step.sol";
 import { Errors } from "../utils/Errors.sol";
@@ -24,6 +24,10 @@ abstract contract AFees is Owned2Step {
      * @notice Event emitted when feeToken is updated
      */
     event FeeTokenUpdated(address oldFeeToken, address newFeeToken);
+    /**
+     * @notice Event emitted when withdrawalFee is updated
+     */
+    event WithdrawalFeeUpdated(uint256 oldWithdrawalFee, uint256 newWithdrawalFee);
 
     /*//////////////////////////////////////////////////////////////
                                 CONSTANTS
@@ -33,6 +37,14 @@ abstract contract AFees is Owned2Step {
      * @notice Max BPS value (100%)
      */
     uint256 public constant MAX_BPS = 10_000;
+    /**
+     * @notice Max withdrawal fee value (10%)
+     */
+    uint256 public constant MAX_WITHDRAWAL_FEE = 1000;
+    /**
+     * @notice Max harvest fee value (20%)
+     */
+    uint256 public constant MAX_HARVEST_FEE = 2000;
 
     /*//////////////////////////////////////////////////////////////
                             MUTABLE VARIABLES
@@ -42,6 +54,10 @@ abstract contract AFees is Owned2Step {
      * @notice fee to be applied when harvesting rewards
      */
     uint256 public harvestFee;
+    /**
+     * @notice fee to be applied when withdrawing funds
+     */
+    uint256 public withdrawalFee;
     /**
      * @notice address to receive the harvest fee
      */
@@ -55,15 +71,21 @@ abstract contract AFees is Owned2Step {
                                 CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(uint256 initialHarvestFee, address initialFeeRecipient, address initialFeeToken) {
+    constructor(
+        uint256 initialHarvestFee,
+        uint256 initialWithdrawalFee,
+        address initialFeeRecipient,
+        address initialFeeToken
+    ) {
         if (initialFeeRecipient == address(0) || initialFeeToken == address(0)) revert Errors.ZeroAddress();
-        if (initialHarvestFee > MAX_BPS) {
+        if (initialHarvestFee > MAX_HARVEST_FEE || initialWithdrawalFee > MAX_WITHDRAWAL_FEE) {
             revert Errors.InvalidFee();
         }
 
         harvestFee = initialHarvestFee;
         feeRecipient = initialFeeRecipient;
         feeToken = initialFeeToken;
+        withdrawalFee = initialWithdrawalFee;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -71,7 +93,7 @@ abstract contract AFees is Owned2Step {
     //////////////////////////////////////////////////////////////*/
 
     function setHarvestFee(uint256 newHarvestFee) external virtual onlyOwner {
-        if (newHarvestFee > MAX_BPS) {
+        if (newHarvestFee > MAX_HARVEST_FEE) {
             revert Errors.InvalidFee();
         }
 
@@ -79,6 +101,17 @@ abstract contract AFees is Owned2Step {
         harvestFee = newHarvestFee;
 
         emit HarvestFeeUpdated(oldHarvestFee, newHarvestFee);
+    }
+
+    function setWithdrawalFee(uint256 newWithdrawalFee) external virtual onlyOwner {
+        if (newWithdrawalFee > MAX_WITHDRAWAL_FEE) {
+            revert Errors.InvalidFee();
+        }
+
+        uint256 oldWithdrawalFee = withdrawalFee;
+        withdrawalFee = newWithdrawalFee;
+
+        emit WithdrawalFeeUpdated(oldWithdrawalFee, newWithdrawalFee);
     }
 
     function setFeeRecipient(address newFeeRecipient) external virtual onlyOwner {

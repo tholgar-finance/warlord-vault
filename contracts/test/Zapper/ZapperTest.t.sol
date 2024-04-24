@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "../Vault/VaultTest.sol";
-import { Zapper } from "../../src/Zapper.sol";
-import { Vault } from "../../src/Vault.sol";
+import "../Vault/VaultTest.t.sol";
+import { Zapper } from "src/Zapper.sol";
+import { Vault } from "src/Vault.sol";
+import { Errors } from "src/utils/Errors.sol";
 
 contract ZapperTest is VaultTest {
     uint256 constant cvxMaxSupply = 100_000_000e18;

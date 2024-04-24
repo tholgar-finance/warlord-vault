@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "../MainnetTest.sol";
-import { Swapper } from "../../src/Swapper.sol";
+import "../MainnetTest.t.sol";
+import { Swapper } from "src/Swapper.sol";
 import { ERC20Mock } from "../mock/ERC20.sol";
+import { Errors } from "src/utils/Errors.sol";
 
 contract SwapperTest is MainnetTest {
     Swapper swapper;

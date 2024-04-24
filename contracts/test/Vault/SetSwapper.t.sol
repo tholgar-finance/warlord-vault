@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./VaultTest.sol";
+import "./VaultTest.t.sol";
 
 contract SetSwapper is VaultTest {
     function test_setSwapper_Normal(address newSwapper) public {

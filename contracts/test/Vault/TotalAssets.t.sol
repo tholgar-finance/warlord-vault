@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./VaultTest.sol";
+import "./VaultTest.t.sol";
 
 contract TotalAssets is VaultTest {
     function test_totalAssets_Normal(uint256 amount) public {

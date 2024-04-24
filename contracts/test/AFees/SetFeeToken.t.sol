@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./AFeesTest.sol";
+import "./AFeesTest.t.sol";
 
 contract SetFeeToken is AFeesTest {
     ERC20Mock fakeMock;

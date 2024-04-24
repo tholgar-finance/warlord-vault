@@ -24,4 +24,5 @@ library Errors {
 
     // Swapper errors
     error NotVault();
+    error WithdrawMoreThanMax();
 }

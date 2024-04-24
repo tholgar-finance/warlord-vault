@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import { Errors } from "./utils/Errors.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -7,7 +7,7 @@ import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
 import { IMinter } from "warlord/interfaces/IMinter.sol";
 import { WETH9 } from "./interfaces/external/WETH.sol";
 import { Allowance } from "./utils/Allowance.sol";
-import { ERC4626 } from "solmate/tokens/ERC4626.sol";
+import { ERC4626 } from "solady/tokens/ERC4626.sol";
 import { Owned2Step } from "./utils/Owned2Step.sol";
 
 /**
@@ -23,12 +23,10 @@ contract Zapper is Owned2Step {
 
     /**
      * @notice This event is emitted when a zap operation occurs.
-     * @param token The token that was zapped.
-     * @param amount The amount of token that was zapped.
      * @param mintedAmount The amount of WAR tokens minted as a result.
      * @param receiver The address of the recipient of the WAR tokens.
      */
-    event Zapped(address indexed token, uint256 amount, uint256 mintedAmount, address receiver);
+    event Zapped(uint256 mintedAmount, address receiver);
     /**
      * @notice This event is emitted when the WarMinter address is changed.
      * @param newMinter The new WarMinter address.
@@ -204,7 +202,6 @@ contract Zapper is Owned2Step {
      */
     function _swap(address[] memory tokens, bytes[] memory callDatas) internal {
         uint256 length = tokens.length;
-
         for (uint256 i; i < length;) {
             address token = tokens[i];
             Allowance._approveTokenIfNeeded(token, tokenTransferAddress);
@@ -233,16 +230,28 @@ contract Zapper is Owned2Step {
     }
 
     /**
+     * @notice Mint a single vlToken
+     * @param receiver Address to stake for
+     * @param vlToken Token to mint WAR
+     * @param amount Amount of token to mint
+     */
+    function _mintSingleToken(address receiver, address vlToken, uint256 amount) internal {
+        IMinter(warMinter).mint(vlToken, amount);
+        uint256 stakedAmount = ERC20(WAR).balanceOf(address(this));
+        ERC4626(vault).deposit(stakedAmount, receiver);
+
+        emit Zapped(stakedAmount, receiver);
+    }
+
+    /**
      * @notice Swap to a single vlToken and mint tWAR
      * @param receiver Address to stake for
      * @param token Token to swap
      * @param vlToken Token to mint WAR
      * @param callDatas bytes to call the router/aggregator
-     * @return stakedAmount Amount of tWAR staked
      */
     function _swapAndMintSingleToken(address receiver, address token, address vlToken, bytes memory callDatas)
         internal
-        returns (uint256 stakedAmount)
     {
         address[] memory tokens = new address[](1);
         tokens[0] = token;
@@ -252,11 +261,27 @@ contract Zapper is Owned2Step {
         // Swap tokens and mint tWAR
         _swap(tokens, calldatas);
         uint256 amount = ERC20(vlToken).balanceOf(address(this));
-        IMinter(warMinter).mint(vlToken, amount);
-        stakedAmount = ERC20(WAR).balanceOf(address(this));
+        _mintSingleToken(receiver, vlToken, amount);
+    }
+
+    /**
+     * @notice Mint multiple vlTokens
+     * @param receiver Address to stake for
+     * @param vlTokens Tokens to mint WAR
+     * @param amounts Amounts to mint
+     */
+    function _mintMultipleTokens(address receiver, address[] memory vlTokens, uint256[] memory amounts) internal {
+        uint256 length = vlTokens.length;
+        for (uint256 i; i < length;) {
+            IMinter(warMinter).mint(vlTokens[i], amounts[i]);
+            unchecked {
+                ++i;
+            }
+        }
+        uint256 stakedAmount = ERC20(WAR).balanceOf(address(this));
         ERC4626(vault).deposit(stakedAmount, receiver);
 
-        emit Zapped(token, msg.value, stakedAmount, receiver);
+        emit Zapped(stakedAmount, receiver);
     }
 
     /**
@@ -265,17 +290,17 @@ contract Zapper is Owned2Step {
      * @param token Token to swap
      * @param vlTokens Tokens to mint WAR
      * @param callDatas bytes to call the router/aggregator
-     * @return stakedAmount Amount of tWAR staked
      */
     function _swapAndMintMultipleTokens(
         address receiver,
         address token,
         address[] memory vlTokens,
         bytes[] memory callDatas
-    ) internal returns (uint256 stakedAmount) {
+    ) internal {
         // Create an array of the same token
-        address[] memory tokens = new address[](callDatas.length);
-        for (uint256 i; i < callDatas.length;) {
+        uint256 length = callDatas.length;
+        address[] memory tokens = new address[](length);
+        for (uint256 i; i < length;) {
             tokens[i] = token;
             unchecked {
                 ++i;
@@ -284,17 +309,16 @@ contract Zapper is Owned2Step {
 
         // Swap tokens and mint tWAR
         _swap(tokens, callDatas);
-        for (uint256 i; i < vlTokens.length;) {
-            uint256 amount = ERC20(vlTokens[i]).balanceOf(address(this));
-            IMinter(warMinter).mint(vlTokens[i], amount);
+
+        length = vlTokens.length;
+        uint256[] memory amounts = new uint256[](length);
+        for (uint256 i; i < length;) {
+            amounts[i] = ERC20(vlTokens[i]).balanceOf(address(this));
             unchecked {
                 ++i;
             }
         }
-        stakedAmount = ERC20(WAR).balanceOf(address(this));
-        ERC4626(vault).deposit(stakedAmount, receiver);
-
-        emit Zapped(token, msg.value, stakedAmount, receiver);
+        _mintMultipleTokens(receiver, vlTokens, amounts);
     }
 
     /**
@@ -302,20 +326,15 @@ contract Zapper is Owned2Step {
      * @param receiver Address to stake for
      * @param vlToken Token to mint WAR
      * @param callDatas bytes to call the router/aggregator
-     * @return stakedAmount Amount of tWAR staked
      */
-    function zapEtherToSingleToken(address vlToken, address receiver, bytes calldata callDatas)
-        external
-        payable
-        returns (uint256 stakedAmount)
-    {
+    function zapEtherToSingleToken(address vlToken, address receiver, bytes calldata callDatas) external payable {
         if (receiver == address(0)) revert Errors.ZeroAddress();
         if (msg.value == 0) revert Errors.ZeroValue();
 
         // Convert native eth to weth
         WETH9(WETH).deposit{ value: msg.value }();
 
-        stakedAmount = _swapAndMintSingleToken(receiver, WETH, vlToken, callDatas);
+        _swapAndMintSingleToken(receiver, WETH, vlToken, callDatas);
     }
 
     /**
@@ -325,7 +344,6 @@ contract Zapper is Owned2Step {
      * @param amount Amount of token to swap
      * @param receiver Address to stake for
      * @param callDatas bytes to call the router/aggregator
-     * @return stakedAmount Amount of tWAR staked
      */
     function zapERC20ToSingleToken(
         address token,
@@ -333,15 +351,15 @@ contract Zapper is Owned2Step {
         uint256 amount,
         address receiver,
         bytes calldata callDatas
-    ) external returns (uint256 stakedAmount) {
+    ) external {
         if (token == address(0)) revert Errors.ZeroAddress();
         if (receiver == address(0)) revert Errors.ZeroAddress();
         if (amount == 0) revert Errors.ZeroValue();
 
-        // Pull ether from sender to this contract
+        // Pull ERC20 from sender to this contract
         SafeTransferLib.safeTransferFrom(token, msg.sender, address(this), amount);
 
-        stakedAmount = _swapAndMintSingleToken(receiver, token, vlToken, callDatas);
+        _swapAndMintSingleToken(receiver, token, vlToken, callDatas);
     }
 
     /**
@@ -349,12 +367,10 @@ contract Zapper is Owned2Step {
      * @param receiver Address to stake for
      * @param vlTokens List of token addresses to deposit
      * @param callDatas bytes to call the router/aggregator
-     * @return stakedAmount Amount of tWAR staked
      */
     function zapEtherToMultipleTokens(address[] calldata vlTokens, address receiver, bytes[] calldata callDatas)
         external
         payable
-        returns (uint256 stakedAmount)
     {
         if (receiver == address(0)) revert Errors.ZeroAddress();
         if (msg.value == 0) revert Errors.ZeroValue();
@@ -362,7 +378,7 @@ contract Zapper is Owned2Step {
         // Convert native eth to weth
         WETH9(WETH).deposit{ value: msg.value }();
 
-        stakedAmount = _swapAndMintMultipleTokens(receiver, WETH, vlTokens, callDatas);
+        _swapAndMintMultipleTokens(receiver, WETH, vlTokens, callDatas);
     }
 
     /**
@@ -372,7 +388,6 @@ contract Zapper is Owned2Step {
      * @param receiver Address to stake for
      * @param vlTokens List of token addresses to deposit
      * @param callDatas bytes to call the router/aggregator
-     * @return stakedAmount Amount of tWAR staked
      */
     function zapERC20ToMultipleTokens(
         address token,
@@ -380,13 +395,52 @@ contract Zapper is Owned2Step {
         uint256 amount,
         address receiver,
         bytes[] calldata callDatas
-    ) external returns (uint256 stakedAmount) {
+    ) external {
         if (receiver == address(0)) revert Errors.ZeroAddress();
         if (amount == 0) revert Errors.ZeroValue();
 
-        // Pull ether from sender to this contract
+        // Pull ERC20 from sender to this contract
         SafeTransferLib.safeTransferFrom(token, msg.sender, address(this), amount);
 
-        stakedAmount = _swapAndMintMultipleTokens(receiver, token, vlTokens, callDatas);
+        _swapAndMintMultipleTokens(receiver, token, vlTokens, callDatas);
+    }
+
+    /**
+     * @notice Zaps a vlToken to tWAR
+     * @param vlToken Token to mint WAR
+     * @param amount Amount of token to swap
+     * @param receiver Address to stake for
+     */
+    function zapVlToken(address vlToken, uint256 amount, address receiver) external {
+        if (vlToken == address(0)) revert Errors.ZeroAddress();
+        if (receiver == address(0)) revert Errors.ZeroAddress();
+        if (amount == 0) revert Errors.ZeroValue();
+
+        // Pull vl token from sender to this contract
+        SafeTransferLib.safeTransferFrom(vlToken, msg.sender, address(this), amount);
+
+        _mintSingleToken(receiver, vlToken, amount);
+    }
+
+    /**
+     * @notice Zaps multiple vlTokens to tWAR
+     * @param vlTokens List of token addresses to deposit
+     * @param amounts List of token amounts to deposit
+     * @param receiver Address to stake for
+     */
+    function zapVlTokens(address[] calldata vlTokens, uint256[] calldata amounts, address receiver) external {
+        if (receiver == address(0)) revert Errors.ZeroAddress();
+
+        // Pull vl tokens from sender to this contract
+        uint256 length = vlTokens.length;
+        for (uint256 i; i < length;) {
+            if (amounts[i] == 0) revert Errors.ZeroValue();
+            SafeTransferLib.safeTransferFrom(vlTokens[i], msg.sender, address(this), amounts[i]);
+            unchecked {
+                ++i;
+            }
+        }
+
+        _mintMultipleTokens(receiver, vlTokens, amounts);
     }
 }

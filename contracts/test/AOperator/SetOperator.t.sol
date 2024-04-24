@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./AOperatorTest.sol";
-import { Errors } from "../../src/utils/Errors.sol";
+import "./AOperatorTest.t.sol";
+import { Errors } from "src/utils/Errors.sol";
 
 contract SetOperator is AOperatorTest {
     function test_setOperator_Normal(address newOperator) public {

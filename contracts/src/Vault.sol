@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import { Pausable } from "openzeppelin-contracts/security/Pausable.sol";
-import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
-import { ReentrancyGuard } from "solmate/utils/ReentrancyGuard.sol";
+import { Pausable } from "openzeppelin-contracts/utils/Pausable.sol";
+import { SafeTransferLib } from "solady/utils/SafeTransferLib.sol";
+import { ReentrancyGuard } from "solady/utils/ReentrancyGuard.sol";
 import { IMinter } from "warlord/interfaces/IMinter.sol";
 import { IStaker } from "warlord/interfaces/IStaker.sol";
-import { ERC4626 } from "solmate/tokens/ERC4626.sol";
+import { ERC4626 } from "solady/tokens/ERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { ISwapper } from "./interfaces/ISwapper.sol";
 import { AOperator } from "./abstracts/AOperator.sol";
@@ -17,10 +17,8 @@ import { Owned2Step } from "./utils/Owned2Step.sol";
 
 /// @author 0xtekgrinder
 /// @title Vault contract
-/// @notice Auto compounding vault for the warlord protocol with token to deposit being WAR and asset being stkWAR
+/// @notice Auto compounding vault for the warlord protocol with token to deposit being WAR and asset() being stkWAR
 contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
-    using SafeTransferLib for ERC20;
-
     /*//////////////////////////////////////////////////////////////
                                  EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -46,6 +44,23 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
      * @notice Event emitted when rewards are compounded into more stkWAR
      */
     event Compounded(uint256 amount);
+
+    /*//////////////////////////////////////////////////////////////
+                          CONSTANTS VARIABLES
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Address of the definitive asset()
+     */
+    address private immutable _asset;
+    /**
+     * @notice Name of the vault
+     */
+    string private constant _NAME = "Tholgar Warlord Vault";
+    /**
+     * @notice Symbol of the vault
+     */
+    string private constant _SYMBOL = "thWAR";
 
     /*//////////////////////////////////////////////////////////////
                           MUTABLE VARIABLES
@@ -74,14 +89,14 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
         address initialMinter,
         address initialSwapper,
         uint256 initialHarvestFee,
+        uint256 initialWithdrawalFee,
         address initialFeeRecipient,
         address initialFeeToken,
         address initialOperator,
         address definitiveAsset
     )
         Owned2Step(initialOwner)
-        ERC4626(ERC20(definitiveAsset), "Tholgar Warlord Token", "tWAR")
-        AFees(initialHarvestFee, initialFeeRecipient, initialFeeToken)
+        AFees(initialHarvestFee, initialWithdrawalFee, initialFeeRecipient, initialFeeToken)
         AOperator(initialOperator)
     {
         if (initialStaker == address(0) || initialMinter == address(0) || initialSwapper == address(0)) {
@@ -92,7 +107,9 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
         minter = initialMinter;
         swapper = initialSwapper;
 
-        ERC20(definitiveAsset).safeApprove(initialStaker, type(uint256).max);
+        _asset = definitiveAsset;
+
+        SafeTransferLib.safeApprove(definitiveAsset, initialStaker, type(uint256).max);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -117,13 +134,13 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
             IStaker(oldStaker).unstake(stakerBalance, address(this));
         }
         // revoke allowance from old staker
-        ERC20(address(asset)).safeApprove(oldStaker, 0);
+        SafeTransferLib.safeApprove(asset(), oldStaker, 0);
 
         // approve all war tokens to be spent by new staker
-        ERC20(address(asset)).safeApprove(newStaker, type(uint256).max);
+        SafeTransferLib.safeApprove(asset(), newStaker, type(uint256).max);
 
         // Restake all tokens
-        uint256 warBalance = asset.balanceOf(address(this));
+        uint256 warBalance = ERC20(asset()).balanceOf(address(this));
         if (warBalance != 0) {
             IStaker(newStaker).stake(warBalance, address(this));
         }
@@ -170,7 +187,7 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
         uint256 amount = ERC20(token).balanceOf(address(this));
         if (amount == 0) revert Errors.ZeroValue();
 
-        ERC20(token).safeTransfer(owner, amount);
+        SafeTransferLib.safeTransfer(token, owner, amount);
 
         return true;
     }
@@ -190,8 +207,40 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
     }
 
     /*//////////////////////////////////////////////////////////////
+                            ERC20 LOGIC
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @dev Returns the name of the token
+     */
+    function name() public view override returns (string memory) {
+        return _NAME;
+    }
+
+    /**
+     * @dev Returns the symbol of the token
+     */
+    function symbol() public view override returns (string memory) {
+        return _SYMBOL;
+    }
+
+    /*//////////////////////////////////////////////////////////////
                             ERC4626 LOGIC
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @dev previewRedeem returns the amount of assets that will be redeemed minus the withdrawal fees
+     */
+    function previewRedeem(uint256 shares) public view override returns (uint256 assets) {
+        return super.previewRedeem(shares) * (MAX_BPS - withdrawalFee) / MAX_BPS;
+    }
+
+    /**
+     * @dev asset is the definitive asset of the vault (WAR)
+     */
+    function asset() public view override returns (address) {
+        return _asset;
+    }
 
     /**
      * @dev totalAssets is the total number of stkWAR
@@ -219,38 +268,40 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
     /**
      * @custom:notpaused when not paused
      */
-    function withdraw(uint256 assets, address receiver, address owner)
+    function withdraw(uint256 assets, address to, address owner)
         public
         override
         whenNotPaused
         returns (uint256 shares)
     {
-        return super.withdraw(assets, receiver, owner);
+        if (assets > maxWithdraw(owner)) revert WithdrawMoreThanMax();
+        shares = previewWithdraw(assets);
+        _withdraw(msg.sender, to, owner, assets * (MAX_BPS - withdrawalFee) / MAX_BPS, shares);
     }
 
     /**
      * @custom:notpaused when not paused
      */
-    function redeem(uint256 shares, address receiver, address owner)
+    function redeem(uint256 shares, address to, address owner)
         public
         override
         whenNotPaused
         returns (uint256 assets)
     {
-        return super.redeem(shares, receiver, owner);
+        return super.redeem(shares, to, owner);
     }
 
     /**
      * @dev stake assets after each deposit
      */
-    function afterDeposit(uint256 assets, uint256 /* shares */ ) internal override {
+    function _afterDeposit(uint256 assets, uint256 /* shares */ ) internal override {
         IStaker(staker).stake(assets, address(this));
     }
 
     /**
      * @dev unstake assets before each withdraw to have enough WAR to transfer
      */
-    function beforeWithdraw(uint256 assets, uint256 /*shares */ ) internal override {
+    function _beforeWithdraw(uint256 assets, uint256 /*shares */ ) internal override {
         IStaker(staker).unstake(assets, address(this));
     }
 
@@ -280,7 +331,7 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
         for (uint256 i; i < length;) {
             address tokenToHarvest = tokensToHarvest[i];
             address recipient;
-            if (tokenToHarvest == address(asset) || tokenToHarvest == address(_feeToken)) {
+            if (tokenToHarvest == asset() || tokenToHarvest == address(_feeToken)) {
                 recipient = address(this);
             } else {
                 recipient = _swapper;
@@ -296,7 +347,7 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
 
         // transfer havestfee %oo to fee recipient
         uint256 harvestedAmount = ERC20(_feeToken).balanceOf(address(this)) - oldFeeBalance;
-        ERC20(_feeToken).safeTransfer(feeRecipient, (harvestedAmount * harvestFee) / MAX_BPS);
+        SafeTransferLib.safeTransfer(_feeToken, feeRecipient, (harvestedAmount * harvestFee) / MAX_BPS);
 
         emit Harvested(harvestedAmount);
     }
@@ -316,22 +367,24 @@ contract Vault is ERC4626, Pausable, ReentrancyGuard, AFees, AOperator {
         address _feeToken = feeToken;
 
         // swap feeToken to WeightedTokens with correct ratios
-        ERC20(_feeToken).safeTransfer(swapper, ERC20(_feeToken).balanceOf(address(this)));
+        SafeTransferLib.safeTransfer(_feeToken, swapper, ERC20(_feeToken).balanceOf(address(this)));
         ISwapper(swapper).swap(tokensToSwap, callDatas);
 
-        // Mint more stkWAR
+        // Mint more stkWAR if there are tokens to mint
         uint256 length = tokensToMint.length;
-        uint256[] memory amounts = new uint256[](length);
-        for (uint256 i; i < length;) {
-            address token = tokensToMint[i];
-            amounts[i] = ERC20(token).balanceOf(address(this));
-            Allowance._approveTokenIfNeeded(token, minter);
-            unchecked {
-                ++i;
+        if (length != 0) {
+            uint256[] memory amounts = new uint256[](length);
+            for (uint256 i; i < length;) {
+                address token = tokensToMint[i];
+                amounts[i] = ERC20(token).balanceOf(address(this));
+                Allowance._approveTokenIfNeeded(token, minter);
+                unchecked {
+                    ++i;
+                }
             }
+            IMinter(minter).mintMultiple(tokensToMint, amounts);
         }
-        IMinter(minter).mintMultiple(tokensToMint, amounts);
-        uint256 stakedAmount = IStaker(staker).stake(asset.balanceOf(address(this)), address(this));
+        uint256 stakedAmount = IStaker(staker).stake(ERC20(asset()).balanceOf(address(this)), address(this));
 
         emit Compounded(stakedAmount);
     }

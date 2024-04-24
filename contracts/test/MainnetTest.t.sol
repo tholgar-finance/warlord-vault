@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./BaseTest.sol";
+import "./BaseTest.t.sol";
 import { IERC20 } from "openzeppelin-contracts/token/ERC20/ERC20.sol";
 import { WarStaker } from "warlord/Staker.sol";
 import { IMinter } from "warlord/interfaces/IMinter.sol";
@@ -37,7 +37,11 @@ contract MainnetTest is BaseTest {
     }
 
     function fork() public {
-        vm.createSelectFork(vm.rpcUrl("ethereum_mainnet"), 17_544_699);
+        vm.createSelectFork(vm.rpcUrl("mainnet"), 17_544_699);
+    }
+
+    function fork(uint256 blockNumber) public {
+        vm.createSelectFork(vm.rpcUrl("mainnet"), blockNumber);
     }
 
     function randomVlToken(uint256 seed) public pure returns (address token) {

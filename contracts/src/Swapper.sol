@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Owned2Step } from "./utils/Owned2Step.sol";

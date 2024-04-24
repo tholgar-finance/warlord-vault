@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./AFeesTest.sol";
-import { Errors } from "../../src/utils/Errors.sol";
+import "./AFeesTest.t.sol";
+import { Errors } from "src/utils/Errors.sol";
 
 contract SetFeeRecipient is AFeesTest {
     function test_setFeeRecipient_Normal(address recipient) public {

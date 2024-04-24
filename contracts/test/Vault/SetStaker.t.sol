@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./VaultTest.sol";
+import "./VaultTest.t.sol";
 
 contract SetStaker is VaultTest {
     function test_setStaker_ZeroBalance() public {
@@ -13,15 +13,15 @@ contract SetStaker is VaultTest {
         vault.setStaker(address(newStaker));
 
         assertEq(vault.staker(), address(newStaker), "Staker should be newStaker");
-        assertEqDecimal(vault.asset().balanceOf(address(vault)), 0, 18, "Vault should have 0 assets");
+        assertEqDecimal(IERC20(vault.asset()).balanceOf(address(vault)), 0, 18, "Vault should have 0 assets");
         assertEqDecimal(newStaker.balanceOf(address(vault)), 0, 18, "newStaker should have 0 assets");
         assertEqDecimal(staker.balanceOf(address(vault)), 0, 18, "staker should have 0 assets");
         assertEq(
-            vault.asset().allowance(address(vault), address(newStaker)),
+            IERC20(vault.asset()).allowance(address(vault), address(newStaker)),
             UINT256_MAX,
             "newStaker should have unlimited allowance"
         );
-        assertEq(vault.asset().allowance(address(vault), address(staker)), 0, "staker should have 0 allowance");
+        assertEq(IERC20(vault.asset()).allowance(address(vault), address(staker)), 0, "staker should have 0 allowance");
     }
 
     function test_setStaker_ZeroAddress() public {
@@ -52,14 +52,14 @@ contract SetStaker is VaultTest {
         vault.setStaker(address(newStaker));
 
         assertEq(vault.staker(), address(newStaker), "Staker should be newStaker");
-        assertEqDecimal(vault.asset().balanceOf(address(vault)), 0, 18, "Vault should have 0 assets");
+        assertEqDecimal(IERC20(vault.asset()).balanceOf(address(vault)), 0, 18, "Vault should have 0 assets");
         assertEqDecimal(newStaker.balanceOf(address(vault)), amount, 18, "newStaker should have all assets");
         assertEqDecimal(staker.balanceOf(address(vault)), 0, 18, "staker should have 0 assets");
         assertEq(
-            vault.asset().allowance(address(vault), address(newStaker)),
+            IERC20(vault.asset()).allowance(address(vault), address(newStaker)),
             UINT256_MAX,
             "newStaker should have unlimited allowance"
         );
-        assertEq(vault.asset().allowance(address(vault), address(staker)), 0, "staker should have 0 allowance");
+        assertEq(IERC20(vault.asset()).allowance(address(vault), address(staker)), 0, "staker should have 0 allowance");
     }
 }

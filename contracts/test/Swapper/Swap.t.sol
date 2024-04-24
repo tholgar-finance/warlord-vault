@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./SwapperTest.sol";
+import "./SwapperTest.t.sol";
 
 contract Swap is SwapperTest {
     function test_swap_Normal() public {

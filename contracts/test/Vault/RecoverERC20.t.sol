@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./VaultTest.sol";
+import "./VaultTest.t.sol";
 
 contract RecoverERC20 is VaultTest {
     function test_recoverERC20_Normal(uint256 amount) public {

@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./VaultTest.sol";
+import "./VaultTest.t.sol";
 
 contract Deposit is VaultTest {
     function test_deposit_Paused() public {
         vm.startPrank(owner);
         vault.pause();
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(Pausable.EnforcedPause.selector);
         vault.deposit(1, alice);
         vm.stopPrank();
     }
 
     function test_deposit_ZeroShares() public {
         vm.startPrank(alice);
-        vm.expectRevert("ZERO_SHARES");
+        vm.expectRevert(Errors.ZeroValue.selector);
         vault.deposit(0, alice);
         vm.stopPrank();
     }
@@ -24,22 +24,22 @@ contract Deposit is VaultTest {
         vm.assume(pranker != owner);
         vm.assume(pranker != address(0));
 
-        deal(address(vault.asset()), pranker, amount);
+        deal(vault.asset(), pranker, amount);
 
-        uint256 initialBalance = vault.asset().balanceOf(address(staker));
+        uint256 initialBalance = IERC20(vault.asset()).balanceOf(address(staker));
 
         vm.startPrank(pranker);
-        vault.asset().approve(address(vault), amount);
+        IERC20(vault.asset()).approve(address(vault), amount);
         vault.deposit(amount, pranker);
         vm.stopPrank();
 
         assertEqDecimal(
-            vault.asset().balanceOf(address(staker)),
+            IERC20(vault.asset()).balanceOf(address(staker)),
             initialBalance + amount,
             18,
             "Staker should have received the assets"
         );
-        assertEqDecimal(vault.asset().balanceOf(address(vault)), 0, 18, "Vault should have 0 assets");
+        assertEqDecimal(IERC20(vault.asset()).balanceOf(address(vault)), 0, 18, "Vault should have 0 assets");
         assertEqDecimal(staker.balanceOf(address(vault)), amount, 18, "Vault should have received the shares");
         assertEqDecimal(vault.totalAssets(), amount, 18, "Vault should have 0 assets");
         assertEqDecimal(vault.balanceOf(pranker), amount, 18, "Pranker should have received the shares");
@@ -57,25 +57,25 @@ contract Deposit is VaultTest {
         deal(address(vault.asset()), pranker1, amount1);
         deal(address(vault.asset()), pranker2, amount2);
 
-        uint256 initialBalance = vault.asset().balanceOf(address(staker));
+        uint256 initialBalance = IERC20(vault.asset()).balanceOf(address(staker));
 
         vm.startPrank(pranker1);
-        vault.asset().approve(address(vault), amount1);
+        IERC20(vault.asset()).approve(address(vault), amount1);
         vault.deposit(amount1, pranker1);
         vm.stopPrank();
 
         vm.startPrank(pranker2);
-        vault.asset().approve(address(vault), amount2);
+        IERC20(vault.asset()).approve(address(vault), amount2);
         vault.deposit(amount2, pranker2);
         vm.stopPrank();
 
         assertEqDecimal(
-            vault.asset().balanceOf(address(staker)),
+            IERC20(vault.asset()).balanceOf(address(staker)),
             initialBalance + amount1 + amount2,
             18,
             "Staker should have received the assets"
         );
-        assertEqDecimal(vault.asset().balanceOf(address(vault)), 0, 18, "Vault should have 0 assets");
+        assertEqDecimal(IERC20(vault.asset()).balanceOf(address(vault)), 0, 18, "Vault should have 0 assets");
         assertEqDecimal(
             staker.balanceOf(address(vault)), amount1 + amount2, 18, "Vault should have received the shares"
         );

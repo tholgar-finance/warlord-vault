@@ -1,37 +1,36 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "./VaultTest.sol";
+import "./VaultTest.t.sol";
 
 contract Withdraw is VaultTest {
     function test_withdraw_Paused() public {
         vm.prank(owner);
         vault.pause();
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(Pausable.EnforcedPause.selector);
         vault.withdraw(0, owner, owner);
     }
 
-    function test_withdraw_Normal(uint256 amount1, uint256 amount2, address pranker) public {
-        amount2 = bound(amount2, 1, 3000e18 - 1);
-        amount1 = bound(amount1, amount2, 3000e18);
+    function test_withdraw_Normal(uint256 amount, address pranker) public {
+       amount = bound(amount, 1e18, 1000e18);
         vm.assume(pranker != address(0));
         vm.assume(pranker != owner);
 
-        deal(address(staker), address(vault), amount1);
-        deal(address(vault.asset()), address(staker), amount1);
-        deal(address(vault), pranker, amount2);
-
-        uint256 assets = vault.convertToAssets(amount2);
+        deal(address(war), pranker, amount);
 
         vm.startPrank(pranker);
-        vault.withdraw(assets, pranker, pranker);
+        war.approve(address(vault), amount);
+        uint256 shares = vault.deposit(amount, pranker);
+
+        uint256 sharesWithdrawn = vault.withdraw(amount, pranker, pranker);
         vm.stopPrank();
 
-        assertEqDecimal(vault.asset().balanceOf(pranker), assets, 18, "Pranker should have received assets");
+        assertEqDecimal(sharesWithdrawn, shares, 18, "Pranker should have withdrawn all shares");
+        assertEqDecimal(IERC20(vault.asset()).balanceOf(pranker), amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS(), 18, "Pranker should have received assets");
         assertEqDecimal(
-            staker.balanceOf(address(vault)), amount1 - assets, 18, "Staker should have received staking tokens"
+            staker.balanceOf(address(vault)), amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()), 18, "Staker should have received staking tokens"
         );
         assertEqDecimal(vault.balanceOf(pranker), 0, 18, "Pranker should have no shares");
-        assertEqDecimal(vault.totalAssets(), amount1 - assets, 18, "Total assets should have decreased");
+        assertEqDecimal(vault.totalAssets(), amount - (amount * (vault.MAX_BPS() - vault.withdrawalFee()) / vault.MAX_BPS()), 18, "Total assets should have decreased");
     }
 }

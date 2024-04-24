@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: Unlicensed
-pragma solidity 0.8.20;
+pragma solidity 0.8.24;
 
-import "../BaseTest.sol";
+import "../BaseTest.t.sol";
 import { AOperatorMock } from "../mock/AOperator.sol";
 import { ERC20Mock } from "../mock/ERC20.sol";
+import { Errors } from "src/utils/Errors.sol";
 
 contract AOperatorTest is BaseTest {
     AOperatorMock operator;
