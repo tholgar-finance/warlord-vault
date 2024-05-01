@@ -209,7 +209,7 @@ async function computeAPY(
     throw new Error('APR is undefined');
 
   const apr = auraBalApr + warApr + wethApr + palApr + cvxCrvApr;
-  const apy = (1 + apr / 48) ** 48 - 1;
+  const apy = (1 + apr / 24) ** 24 - 1;
   const apyString = (apy * 100).toFixed(2) + '%';
 
   return apyString;
