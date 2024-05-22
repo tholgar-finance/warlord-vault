@@ -2,6 +2,7 @@ import { BigNumber, Contract } from "ethers";
 import wallet from "../config/wallet";
 import getParaswapData from "./getParaswapData";
 import ERC20_ABI from "../abi/ERC20.json";
+import STAKER_ABI from "../abi/Staker.json";
 import VAULT_ABI from "../abi/Vault.json";
 import checkGasPrice from "./checkGasPrice";
 
@@ -9,6 +10,7 @@ const MAX_WEIGHT = 10000;
 
 const compound = async (
   vaultAddress: string,
+  stakerAddress: string,
   maxGasPrice: number,
   slippage: number,
   ratios: Map<string, BigNumber>,
@@ -20,6 +22,7 @@ const compound = async (
 
   // Create vault contract
   const vault = new Contract(vaultAddress, VAULT_ABI, provider);
+  const staker = new Contract(stakerAddress, STAKER_ABI, provider);
 
   // Get swap data for fee token to mintable token
   const outputData: string[] = [];
@@ -31,7 +34,10 @@ const compound = async (
     const feeContract = new Contract(feeToken, ERC20_ABI, provider);
     const srcDecimals = await feeContract.decimals();
     const swapperAddress = await vault.swapper();
-    const balance = BigNumber.from("128011731108407789").add("552837949233397");
+
+    const rewards = await staker.getUserTotalClaimableRewards(vaultAddress);
+    const swapperBalance = await feeContract.balanceOf(swapperAddress);
+    const balance = rewards.find((r: any) => r[0] === feeToken)?.[1].add(swapperBalance).mul((await vault.MAX_BPS()).sub(await vault.harvestFee())).div(await vault.MAX_BPS());
 
     for (let i = 0; i < ratios.size; i++) {
       tokensToSwap.push(feeToken);

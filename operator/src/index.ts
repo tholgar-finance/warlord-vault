@@ -37,7 +37,7 @@ function mainJob(
     }
 
     try {
-      await compound(vaultAddress, maxGasPrice, slippage, ratios);
+      await compound(vaultAddress, stakerAddress, maxGasPrice, slippage, ratios);
     } catch (err: any) {
       console.log(`Compound failed: ${err.message}`);
       retryCompoundTask.start();
@@ -83,6 +83,7 @@ function retryHarvestJob(
 
 function retryCompoundJob(
   vaultAddress: string,
+  stakerAddress: string,
   maxGasPrice: number,
   slippage: number,
   ratios: Map<string, BigNumber>
@@ -97,7 +98,7 @@ function retryCompoundJob(
         retryCompoundRunning = true;
       }
       try {
-        await compound(vaultAddress, maxGasPrice, slippage, ratios);
+        await compound(vaultAddress, stakerAddress, maxGasPrice, slippage, ratios);
         retryCompoundTask.stop();
         retryCompoundRunning = false;
       } catch (err: any) {
@@ -132,12 +133,13 @@ function retryCompoundJob(
     return;
   }
   if (compoundEnabled) {
-    await compound(vaultAddress, maxGasPrice, slippage, ratios, false);
+    await compound(vaultAddress, stakerAddress, maxGasPrice, slippage, ratios, false);
     return;
   }
 
   const retryCompoundTask = retryCompoundJob(
     vaultAddress,
+    stakerAddress,
     maxGasPrice,
     slippage,
     ratios

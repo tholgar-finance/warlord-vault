@@ -16,7 +16,7 @@ export default async function getParaswapData(
   const paraswapApiUrl = config.paraswapApiUrl();
   try {
     const priceRoute: any = await axios.get(
-      `${paraswapApiUrl}/prices?srcToken=${srcToken}&destToken=${destToken}&amount=${amount.toString()}&side=SELL&network=${chainId}&srcDecimals=${srcDecimals}&destDecimals=${destDecimals}&excludeContractMethods=protectedMegaSwap,protectedSimpleSwap,protectedSimpleBuy,protectedMultiSwap,directBalancerV2GivenInSwap`
+      `${paraswapApiUrl}/prices?srcToken=${srcToken}&destToken=${destToken}&amount=${amount.toString()}&side=SELL&network=${chainId}&srcDecimals=${srcDecimals}&destDecimals=${destDecimals}&excludeContractMethods=protectedMegaSwap,protectedSimpleSwap,swapOnUniswapV2Fork,swapOnUniswapFork,protectedSimpleBuy,protectedMultiSwap,directBalancerV2GivenInSwap`
     );
     if (!priceRoute.data["priceRoute"]) {
       throw new Error("No price route found");
