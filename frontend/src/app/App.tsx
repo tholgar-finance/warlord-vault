@@ -2,6 +2,7 @@ import React from 'react';
 import {
   /*RouterProvider, Navigate, createBrowserRouter */
   BrowserRouter,
+  HashRouter,
   Route,
   Routes
 } from 'react-router-dom';
@@ -57,18 +58,18 @@ const ViewportRouter = () => {
               html[data-theme='light'] {
                 ${cssStringFromTheme(lightTheme)}
               }
-    
+
               html[data-theme='dark'] {
                 ${cssStringFromTheme(darkTheme)}
               }
             `
           }}
         />
-        <BrowserRouter>
+        <HashRouter>
           <NavigablePage>
             <Router />
           </NavigablePage>
-        </BrowserRouter>
+        </HashRouter>
       </RainbowKitProvider>
     </WagmiConfig>
   );
