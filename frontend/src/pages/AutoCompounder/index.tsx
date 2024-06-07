@@ -22,8 +22,8 @@ const AutoCompounder: FC = () => {
           <TabList borderBottom={'none'}>
             <Tab>Deposit</Tab>
             <Tab>Withdraw</Tab>
-            {/*<Tab>Withdraw v1</Tab>*/}
-            <Tab>Migrate</Tab>
+            {/*<Tab>Withdraw v1</Tab>
+            <Tab>Migrate</Tab>*/}
           </TabList>
         </Container>
 
@@ -39,10 +39,10 @@ const AutoCompounder: FC = () => {
             <TabPanel p={0}>
               <WithdrawV1Panel />
             </TabPanel>
-          */}
             <TabPanel p={0}>
               <MigratePanel />
             </TabPanel>
+          */}
           </TabPanels>
         </Container>
       </Tabs>
