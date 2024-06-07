@@ -9,6 +9,7 @@ export interface TokenNumberInputProps {
   ticker: string;
   iconUrl: string;
   value?: string;
+  rightElement: JSX.Element;
   // eslint-disable-next-line no-unused-vars
   onInputChange: (value: string) => void;
   onInputClear: () => void;
@@ -20,6 +21,7 @@ export const TokenNumberInput: FC<TokenNumberInputProps> = ({
   ticker,
   iconUrl,
   value,
+  rightElement,
   onInputChange,
   onInputClear,
   onMaxClick
@@ -66,7 +68,7 @@ export const TokenNumberInput: FC<TokenNumberInputProps> = ({
           </HStack>
         </VStack>
         <VStack justify={'center'}>
-          <TokenDisplay tokenIconUrl={iconUrl} ticker={ticker} />
+          {rightElement}
         </VStack>
       </Flex>
     </Container>

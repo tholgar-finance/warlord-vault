@@ -1,10 +1,25 @@
 import { FC, useCallback, useMemo } from 'react';
 import { TokenNumberInput } from '../../inputs/TokenNumberInput';
-import { warAddress, warIconUrl } from 'config/blockchain';
-import { useStore } from '../../../store';
+import { auraCvxIconUrl, ethIconUrl, warAddress, warIconUrl, wethIconUrl } from 'config/blockchain';
+import { tokensSelection, useStore } from '../../../store';
 import useOrFetchTokenInfos from '../../../hooks/useOrFetchTokenInfos';
 import convertBigintToFormatted from '../../../utils/convertBigintToFormatted';
 import convertFormattedToBigInt from '../../../utils/convertFormattedToBigInt';
+import { TokenSelector } from 'components/ui/TokenSelector';
+
+const tokensDetails = [
+  { id: 'war', name: 'WAR', iconUrl: warIconUrl },
+  {
+    id: 'eth',
+    name: 'ETH',
+    iconUrl: ethIconUrl
+  },
+  {
+    id: 'weth',
+    name: 'WETH',
+    iconUrl: wethIconUrl
+  }
+];
 
 export interface WarDepositPanelProps {}
 
@@ -12,6 +27,11 @@ export const WarDepositPanel: FC<WarDepositPanelProps> = () => {
   const warInfos = useOrFetchTokenInfos({ token: 'war' });
   const warDecimals = warInfos?.decimals;
   const warDepositInputAmount = useStore((state) => state.getDepositInputTokenAmount('war'));
+  const [singleDepositToken, setDepositToken, setSingleDepositInputToken] = useStore((state) => [
+    state.singleDepositToken,
+    state.setDepositToken,
+    state.setSingleDepositToken
+  ]);
   const [setDepositInputTokenAmount, setMaxDepositInputTokenAmount] = useStore((state) => [
     state.setDepositInputTokenAmount,
     state.setMaxDepositInputTokenAmount
@@ -41,6 +61,16 @@ export const WarDepositPanel: FC<WarDepositPanelProps> = () => {
       onMaxClick={() => {
         setMaxDepositInputTokenAmount('war');
       }}
+      rightElement={
+        <TokenSelector 
+          tokens={tokensDetails} 
+          selection={singleDepositToken} 
+          onTokenSelect={(token) => {
+            setDepositToken(token as tokensSelection)
+            setSingleDepositInputToken(token as tokensSelection)
+          }}
+        />
+    }
     />
   );
 };

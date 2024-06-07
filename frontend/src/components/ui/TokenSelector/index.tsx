@@ -16,6 +16,7 @@ export interface TokenSelectorProps {
   // eslint-disable-next-line no-unused-vars
   onTokenSelect: (token: string) => void;
   tokens: { id: string; name: string; iconUrl: string }[];
+  selection?: string;
 }
 
 // eslint-disable-next-line no-unused-vars
@@ -26,8 +27,8 @@ const Item: FC<{ name: string; iconUrl: string }> = ({ name, iconUrl }) => (
   </HStack>
 );
 
-export const TokenSelector: FC<TokenSelectorProps> = ({ onTokenSelect, tokens }) => {
-  const [idSelected, setIdSelected] = useState<string>(tokens[0]?.id ?? '');
+export const TokenSelector: FC<TokenSelectorProps> = ({ onTokenSelect, tokens, selection }) => {
+  const [idSelected, setIdSelected] = useState<string>(selection ?? tokens[0]?.id ?? '');
   const selected = useMemo(() => tokens.find((t) => t.id == idSelected), [idSelected, tokens]);
   const select = (token: string) => {
     setIdSelected(token);
@@ -39,7 +40,7 @@ export const TokenSelector: FC<TokenSelectorProps> = ({ onTokenSelect, tokens })
       <MenuButton
         as={Button}
         opacity={1}
-        backgroundColor={useColorModeValue('background.300.light', 'background.200.dark')}
+        backgroundColor={useColorModeValue('background.100.light', 'background.100.dark')}
         _hover={{}}
         _active={{}}
         rightIcon={<ChevronDownIcon />}

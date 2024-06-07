@@ -27,6 +27,7 @@ import useOrFetchTokenInfos from '../../../hooks/useOrFetchTokenInfos';
 import { WalletConnectButton } from 'components/blockchain/WalletConnectButton';
 import useConnectedAccount from 'hooks/useConnectedAccount';
 import useOrFetchUserTokenBalance from '../../../hooks/useOrFetchUserTokenBalance';
+import { TokenDisplay } from 'components/ui/TokenDisplay';
 
 export interface WithdrawPanelProps {}
 
@@ -113,6 +114,7 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
                   setWithdrawOutputTokenAmount('war', 0n);
                 }}
                 onMaxClick={() => setMaxWithdrawInputTokenAmount('thWAR')}
+                rightElement={<TokenDisplay tokenIconUrl={wstkWarIconUrl} ticker={'thWAR'} />}
               />
             </Box>
             <Box w="100%">
@@ -128,29 +130,19 @@ export const WithdrawPanel: FC<WithdrawPanelProps> = () => {
           </VStack>
         </Box>
         <Box w="100%">
-          <Grid templateColumns="repeat(2, 1fr)" gap={6} mt={5}>
-            <GridItem>
-              <TokenSelector
-                onTokenSelect={(token) => setWithdrawToken(token as tokensSelection)}
-                tokens={tokens}
-              />
-            </GridItem>
-            <GridItem>
-              {isConnected ? (
-                <Button
-                  w={'full'}
-                  backgroundColor={buttonBgColor}
-                  _hover={{ bgColor: buttonHoverColor }}
-                  color={buttonColor}
-                  onClick={onOpen}
-                  isDisabled={isWithdrawDisabled}>
-                  Withdraw
-                </Button>
-              ) : (
-                <WalletConnectButton />
-              )}
-            </GridItem>
-          </Grid>
+          {isConnected ? (
+            <Button
+              w={'full'}
+              backgroundColor={buttonBgColor}
+              _hover={{ bgColor: buttonHoverColor }}
+              color={buttonColor}
+              onClick={onOpen}
+              isDisabled={isWithdrawDisabled}>
+              Withdraw
+            </Button>
+          ) : (
+            <WalletConnectButton />
+          )}
         </Box>
       </VStack>
       <WithdrawPanelModal vaultAddress={vaultAddress} open={isOpen} onClose={onClose} inputToken={'thWAR'} />

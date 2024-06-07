@@ -4,13 +4,12 @@ import { FC, JSX, useEffect, useMemo } from 'react';
 import {
   Button,
   Center,
-  Grid,
-  GridItem,
   VStack,
   Text,
   useColorModeValue,
   useDisclosure,
-  Box
+  Box,
+  Flex
 } from '@chakra-ui/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TokenNumberOutput } from '../../ui/TokenNumberOutput';
@@ -18,7 +17,6 @@ import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
 import { WarDepositPanel } from '../WarDeposit';
 import { AuraCvxDepositPanel } from '../AuraCvxDeposit';
 import { DepositPanelModal } from '../DepositModal';
-import { TokenSelector } from '../../ui/TokenSelector';
 import {
   auraAddress,
   auraCvxIconUrl,
@@ -52,25 +50,6 @@ const tokensInputs = new Map<string, () => JSX.Element>([
   ['weth', () => <WethDepositPanel key={4} />]
 ]);
 
-const tokensDetails = [
-  { id: 'war', name: 'WAR', iconUrl: warIconUrl },
-  {
-    id: 'aura/cvx',
-    name: 'AURA/CVX',
-    iconUrl: auraCvxIconUrl
-  },
-  {
-    id: 'eth',
-    name: 'ETH',
-    iconUrl: ethIconUrl
-  },
-  {
-    id: 'weth',
-    name: 'WETH',
-    iconUrl: wethIconUrl
-  }
-];
-
 export const DepositPanel: FC<DepositPanelProps> = () => {
   const { isConnected } = useConnectedAccount();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -80,8 +59,9 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
   const ethDepositAmount = useStore((state) => state.getDepositInputTokenAmount('eth'));
   const wethDepositAmount = useStore((state) => state.getDepositInputTokenAmount('weth'));
   const wstkWAROutputAmount = useStore((state) => state.getDepositOutputTokenAmount('thWAR'));
-  const [depositToken, setDepositToken] = useStore((state) => [
+  const [depositToken, singleDepositToken, setDepositToken] = useStore((state) => [
     state.depositToken,
+    state.singleDepositToken,
     state.setDepositToken
   ]);
   const setDepositOutputTokenAmounts = useStore((state) => state.setDepositOutputTokenAmount);
@@ -173,6 +153,10 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
         return 'Mint thWAR with WAR';
       case 'aura/cvx':
         return 'Mint thWAR with CVX, AURA or both';
+      case 'eth':
+        return 'Mint thWAR with ETH';
+      case 'weth':
+        return 'Mint thWAR with WETH';
     }
   }, [depositToken]);
   const infoDesc = useMemo(() => {
@@ -181,6 +165,10 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
         return 'Deposit WAR in the vault to mint thWAR. The value of thWAR will grow with time as rewards are harvested.';
       case 'aura/cvx':
         return 'Mint WAR and deposit into the vault in one transaction. The value of thWAR will grow with time as rewards are harvested.';
+      case 'eth':
+        return 'Deposit ETH in the vault to mint thWAR. The value of thWAR will grow with time as rewards are harvested.';
+      case 'weth':
+        return 'Deposit WETH in the vault to mint thWAR. The value of thWAR will grow with time as rewards are harvested.';
     }
   }, [depositToken]);
 
@@ -296,12 +284,20 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
   return (
     <>
       <VStack gap={5}>
-        <Box w="100%">
-          <Text fontSize={'1.125em'} fontWeight={'semibold'}>
-            {info}
-          </Text>
-          <Text opacity={0.7}>{infoDesc}</Text>
-        </Box>
+        <Flex justify={'space-between'} w={'100%'}>
+          <Box w="100%">
+            <Text fontSize={'1.125em'} fontWeight={'semibold'}>
+              {info}
+            </Text>
+            <Text opacity={0.7}>{infoDesc}</Text>
+          </Box>
+          <Button
+            variant={'outline'}
+            onClick={() => setDepositToken(depositToken === 'aura/cvx' ? singleDepositToken : 'aura/cvx')}
+          >
+            Mint with {depositToken === 'aura/cvx' ? 'WAR / (W)ETH' : 'AURA/CVX'}
+          </Button>
+        </Flex>
         <Box w="100%">
           <VStack gap={2}>
             <Box w="100%">
@@ -322,29 +318,19 @@ export const DepositPanel: FC<DepositPanelProps> = () => {
           </VStack>
         </Box>
         <Box w="100%">
-          <Grid templateColumns="repeat(2, 1fr)" gap={6} mt={5}>
-            <GridItem>
-              <TokenSelector
-                onTokenSelect={(token) => setDepositToken(token as tokensSelection)}
-                tokens={tokensDetails}
-              />
-            </GridItem>
-            <GridItem>
-              {isConnected ? (
-                <Button
-                  w={'full'}
-                  backgroundColor={buttonBgColor}
-                  onClick={onOpen}
-                  isDisabled={isDepositDisabled}
-                  _hover={{ bgColor: buttonHoverColor }}
-                  color={buttonColor}>
-                  Deposit
-                </Button>
-              ) : (
-                <WalletConnectButton />
-              )}
-            </GridItem>
-          </Grid>
+          {isConnected ? (
+            <Button
+              w={'full'}
+              backgroundColor={buttonBgColor}
+              onClick={onOpen}
+              isDisabled={isDepositDisabled}
+              _hover={{ bgColor: buttonHoverColor }}
+              color={buttonColor}>
+              Deposit
+            </Button>
+          ) : (
+            <WalletConnectButton />
+          )}
         </Box>
       </VStack>
       <DepositPanelModal depositTokens={depositToken} open={isOpen} onClose={onClose} />

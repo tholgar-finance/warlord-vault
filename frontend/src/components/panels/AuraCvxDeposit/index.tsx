@@ -6,6 +6,7 @@ import useOrFetchTokenInfos from '../../../hooks/useOrFetchTokenInfos';
 import { useStore } from '../../../store';
 import convertBigintToFormatted from '../../../utils/convertBigintToFormatted';
 import convertFormattedToBigInt from '../../../utils/convertFormattedToBigInt';
+import { TokenDisplay } from 'components/ui/TokenDisplay';
 
 export interface AuraCvxDepositPanelProps {}
 
@@ -56,6 +57,9 @@ export const AuraCvxDepositPanel: FC<AuraCvxDepositPanelProps> = () => {
         onInputChange={setAuraAmount}
         onInputClear={() => setDepositOutputTokenAmount('thWAR', 0n)}
         onMaxClick={() => setMaxDepositInputTokenAmount('aura')}
+        rightElement={
+          <TokenDisplay tokenIconUrl={auraIconUrl} ticker={'AURA'} />
+        }
       />
       <TokenNumberInput
         token={cvxAddress}
@@ -65,6 +69,9 @@ export const AuraCvxDepositPanel: FC<AuraCvxDepositPanelProps> = () => {
         onInputChange={setCvxAmount}
         onInputClear={() => setDepositOutputTokenAmount('thWAR', 0n)}
         onMaxClick={() => setMaxDepositInputTokenAmount('cvx')}
+        rightElement={
+          <TokenDisplay tokenIconUrl={cvxIconUrl} ticker={'CVX'} />
+        }
       />
     </Flex>
   );
