@@ -12,8 +12,8 @@ export interface SelectedTokenStore {
 }
 
 export const createSelectedTokenStore: StateCreator<Store, [], [], SelectedTokenStore> = (set) => ({
-  depositToken: 'war',
-  singleDepositToken: 'war',
+  depositToken: 'eth',
+  singleDepositToken: 'eth',
   withdrawToken: 'war',
   setDepositToken: (token: tokensSelection) =>
     set((state: Store) => ({ ...state, depositToken: token })),
