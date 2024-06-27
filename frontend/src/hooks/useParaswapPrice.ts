@@ -17,6 +17,6 @@ export default function useParaswapPrices({
 }): { data: any; error: any; isLoading: boolean } {
   return useSWR(() => {
     if (!srcToken || !destToken || !srcDecimals || !destDecimals || amount === 0n) return undefined;
-    return `https://apiv5.paraswap.io/prices?srcToken=${srcToken}&destToken=${destToken}&amount=${amount}&side=SELL&network=1&srcDecimals=${srcDecimals}&destDecimals=${destDecimals}&excludeContractMethods=protectedMegaSwap,protectedSimpleSwap,protectedSimpleBuy,protectedMultiSwap,directBalancerV2GivenInSwap`;
+    return `https://api.paraswap.io/prices?version=6.2&srcToken=${srcToken}&destToken=${destToken}&amount=${amount}&side=SELL&network=1&srcDecimals=${srcDecimals}&destDecimals=${destDecimals}`;
   }, fetcher);
 }
