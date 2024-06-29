@@ -12,7 +12,7 @@ export default function useParaswapTransaction(
   const { data, error, isLoading } = useSWR(
     () => {
       if (!priceRoute || !slippage || !user || !timeout) return undefined;
-      return `https://apiv5.paraswap.io/transactions/1?ignoreChecks=true&ignoreGasEstimate=true`;
+      return `https://api.paraswap.io/transactions/1?ignoreChecks=true&ignoreGasEstimate=true`;
     },
     fetcher({
       slippage,
