@@ -20,7 +20,6 @@ const AutoCompounder: FC = () => {
           borderBottom={'0'}
           borderRadius={'1.5em'}>
           <TabList borderBottom={'none'}>
-            <Tab>Deposit</Tab>
             <Tab>Withdraw</Tab>
             {/*<Tab>Withdraw v1</Tab>
             <Tab>Migrate</Tab>*/}
@@ -29,9 +28,6 @@ const AutoCompounder: FC = () => {
 
         <Container px={6} py={9} my={0} mx="4em" borderTopRadius={'0'} borderRadius={'1.5em'}>
           <TabPanels>
-            <TabPanel p={0}>
-              <DepositPanel />
-            </TabPanel>
             <TabPanel p={0}>
               <WithdrawPanel />
             </TabPanel>
